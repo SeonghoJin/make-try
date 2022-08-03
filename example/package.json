@@ -1,0 +1,13 @@
+{
+    "name": "ts-try-catch-wrap-example",
+    "scripts": {
+        "start": "ts-node example.ts"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@types/jest": "^28.1.6",
+        "ts-node": "^10.9.1",
+        "ts-try-catch-wrap": "file:../"
+    }
+}
