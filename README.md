@@ -1,3 +1,8 @@
+# Usage
+```
+npm i ts-try-catch-wrap
+```
+
 # Why
 
 
