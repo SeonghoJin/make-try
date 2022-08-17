@@ -31,10 +31,6 @@ export type IsAsyncFunction<T extends Function> =
     : false
     : false;
 
-export const isPromise = <T extends Promise<unknown>>(value: T) => {
-    return value instanceof Promise;
-}
-
 export type MakeSyncReturn<T extends Function> =
     (...args: Parameters<T>) => MakeReturnPayload<ReturnType<T>>
 
@@ -45,6 +41,10 @@ export type MakeTryReturn<T extends Function> =
     IsAsyncFunction<T> extends true
     ? MakeAsyncReturn<T>
     : MakeSyncReturn<T>;
+
+export const isPromise = <T extends Promise<unknown>>(value: T) => {
+    return value instanceof Promise;
+}
 
 export const makeTry = <T extends Function>(callback: T):
     MakeTryReturn<T> => {
