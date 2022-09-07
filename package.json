@@ -1,6 +1,6 @@
 {
   "name": "ts-try-catch-wrap",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "",
   "module": "./dist/index.js",
   "main": "./dist/index.js",
