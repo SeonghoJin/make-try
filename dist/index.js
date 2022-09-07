@@ -5,8 +5,7 @@ const isPromise = (value) => {
     return value instanceof Promise;
 };
 exports.isPromise = isPromise;
-const makeTry = (callback) => {
-    // @ts-ignore
+function makeTry(callback) {
     return (...args) => {
         try {
             const result = callback(...args);
@@ -41,5 +40,5 @@ const makeTry = (callback) => {
             };
         }
     };
-};
+}
 exports.makeTry = makeTry;
