@@ -46,10 +46,9 @@ export const isPromise = <T extends Promise<unknown>>(value: T) => {
     return value instanceof Promise;
 }
 
-export const makeTry = <T extends Function>(callback: T):
-    MakeTryReturn<T> => {
-
-    // @ts-ignore
+export function makeTry<T extends AsyncFunction>(callback: T): MakeTryReturn<T>;
+export function makeTry<T extends Function>(callback: T): MakeTryReturn<T>;
+export function makeTry<T extends Function>(callback: T): any{
     return (...args: Parameters<T>) => {
         try {
             const result = callback(...args);
