@@ -2,10 +2,6 @@ export type Function = (...args: any[]) => any;
 
 export type AsyncFunction = (...args: any[]) => Promise<any>;
 
-export type UnPackPromise<T> = T extends Promise<infer Payload>
-    ? Payload
-    : T;
-
 export type Fullfiled<T> = {
     err: null;
     hasError: false;
@@ -20,7 +16,7 @@ export type Rejected = {
 
 export type MakeReturnPayload<T> =
     Rejected |
-    Fullfiled<UnPackPromise<T>>;
+    Fullfiled<Awaited<T>>;
 
 export type IsAsyncFunction<T extends Function> =
     ReturnType<T> extends never ?
@@ -54,7 +50,7 @@ export function makeTry<T extends Function>(callback: T): unknown {
             const result = callback(...args);
             if (isPromise(result)) {
                 return new Promise(res => {
-                    result.then((value: UnPackPromise<ReturnType<T>>) => {
+                    result.then((value: Awaited<ReturnType<T>>) => {
                         res({
                             result: value,
                             hasError: false,
