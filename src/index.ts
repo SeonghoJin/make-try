@@ -21,10 +21,8 @@ export type MakeReturnPayload<T> =
 export type IsAsyncFunction<T extends Function> =
     ReturnType<T> extends never ?
     false :
-    T extends (...args: any[]) => infer R
-    ? R extends Promise<any>
+    ReturnType<T> extends Promise<any>
     ? true
-    : false
     : false;
 
 export type MakeSyncReturn<T extends Function> =
