@@ -156,3 +156,21 @@ const getAsyncFile = async (filename: string) => {
     console.log(file2);
 })();
 ```
+
+## Abort 
+
+```typescript
+  const slowApi = async () => {
+    await new Promise(res => setTimeout(res, 3000));
+    return 'hi'
+  }
+  
+  const trySlowApi = makeTry(slowApi, {
+    abort: true,
+    reason: 'slow api'
+  });
+  
+  trySlowApi().then(console.log);
+  
+  setTimeout(trySlowApi.abort, 1500);
+```
