@@ -5,26 +5,40 @@ const isPromise = (value) => {
     return value instanceof Promise;
 };
 exports.isPromise = isPromise;
-function makeTry(callback) {
-    return (...args) => {
+function makeTry(callback, options) {
+    let controller = null;
+    const wrapFunc = (...args) => {
         try {
             const result = callback(...args);
             if ((0, exports.isPromise)(result)) {
-                return new Promise(res => {
+                controller === null || controller === void 0 ? void 0 : controller.abort();
+                const promise = new Promise((res, rej) => {
+                    if (options === null || options === void 0 ? void 0 : options.abort) {
+                        controller = new AbortController();
+                    }
+                    controller === null || controller === void 0 ? void 0 : controller.signal.addEventListener('abort', () => {
+                        var _a;
+                        res({
+                            result: null,
+                            hasError: true,
+                            err: new Error((_a = options === null || options === void 0 ? void 0 : options.reason) !== null && _a !== void 0 ? _a : 'abort'),
+                        });
+                    });
                     result.then((value) => {
                         res({
                             result: value,
                             hasError: false,
-                            err: null
+                            err: null,
                         });
                     }).catch((e) => {
                         res({
                             result: null,
                             hasError: true,
-                            err: e
+                            err: e,
                         });
                     });
                 });
+                return promise;
             }
             return {
                 hasError: false,
@@ -40,5 +54,9 @@ function makeTry(callback) {
             };
         }
     };
+    if (options === null || options === void 0 ? void 0 : options.abort) {
+        wrapFunc.abort = () => controller === null || controller === void 0 ? void 0 : controller.abort();
+    }
+    return wrapFunc;
 }
 exports.makeTry = makeTry;
