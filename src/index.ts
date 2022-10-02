@@ -29,7 +29,7 @@ export type MakeSyncReturn<T extends Function> =
     (...args: Parameters<T>) => MakeReturnPayload<ReturnType<T>>
 
 export type MakeAsyncReturn<T extends AsyncFunction> =
-    (...args: Parameters<T>) => Promise<MakeReturnPayload<ReturnType<T>>>;
+    (...args: Parameters<T>) => Promise<MakeReturnPayload<ReturnType<T>>> & CanAbort
 
 export type MakeTryReturn<T extends Function> =
     IsAsyncFunction<T> extends true
@@ -40,28 +40,51 @@ export const isPromise = <T extends Promise<unknown>>(value: T) => {
     return value instanceof Promise;
 }
 
-export function makeTry<T extends AsyncFunction>(callback: T): MakeTryReturn<T>;
+export interface CanAbort {
+    abort(): void;
+}
+
+export type TryCatchWrapOption = {
+    abort?: boolean;
+    reason?: string
+};
+
+export function makeTry<T extends AsyncFunction>(callback: T, options?: TryCatchWrapOption): MakeTryReturn<T> & CanAbort;
 export function makeTry<T extends Function>(callback: T): MakeTryReturn<T>;
-export function makeTry<T extends Function>(callback: T): unknown {
-    return (...args: Parameters<T>) => {
+export function makeTry<T extends Function>(callback: T, options?: TryCatchWrapOption): unknown {
+    let controller: AbortController | null = null;
+    const wrapFunc = (...args: Parameters<T>) => {
         try {
             const result = callback(...args);
             if (isPromise(result)) {
-                return new Promise(res => {
+                controller?.abort();
+                const promise = new Promise((res, rej) => {
+                    if(options?.abort){
+                        controller = new AbortController();
+                    }
+                    controller?.signal.addEventListener('abort', () => {
+                        res({
+                            result: null,
+                            hasError: true,
+                            err: new Error(options?.reason ?? 'abort'),
+                        });
+                    })
                     result.then((value: Awaited<ReturnType<T>>) => {
                         res({
                             result: value,
                             hasError: false,
-                            err: null
+                            err: null,
                         });
                     }).catch((e: unknown) => {
                         res({
                             result: null,
                             hasError: true,
-                            err: e
+                            err: e,
                         });
                     })
-                })
+                });
+
+                return promise;
             }
             return {
                 hasError: false,
@@ -76,4 +99,8 @@ export function makeTry<T extends Function>(callback: T): unknown {
             }
         }
     }
+    if(options?.abort){
+        wrapFunc.abort = () => controller?.abort();
+    }
+    return wrapFunc;
 }

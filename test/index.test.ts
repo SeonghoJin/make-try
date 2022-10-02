@@ -30,6 +30,46 @@ test("make try function - async(fail)", async () => {
     }
 });
 
+test("make try function - abort", (done) => {
+    const tryTest1 = makeTry(async () => {
+        await new Promise(res => setTimeout(res, 1000));
+        return 'hi';
+    }, {
+        abort: true,
+        reason: 'hi',
+    });
+
+    let response = tryTest1();
+
+    setTimeout(() => {
+        tryTest1.abort();
+    }, 500)
+
+    response.then(({hasError, result, err}) => {
+        expect(hasError).toBeTruthy();
+        if (hasError) {
+            expect(result).toEqual(null);
+            expect(err).toBeInstanceOf(Error);
+        }
+    })
+    setTimeout(() => {
+        const response2 = tryTest1();
+
+        setTimeout(() => {
+            tryTest1.abort();
+        }, 900)
+
+        response2.then(({hasError, result, err}) => {
+            expect(hasError).toBeTruthy();
+            if (hasError) {
+                expect(result).toEqual(null);
+                expect(err).toBeInstanceOf(Error);
+            }
+            done();
+        })
+    }, 1500);
+});
+
 test("make try function - sync(success)", () => {
     const tryTest1 = makeTry(() => {
         return {
