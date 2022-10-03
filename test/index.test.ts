@@ -45,12 +45,12 @@ test("make try function - not defined abort", done => {
 });
 
 
-test("make try function - run one funciton", async () => {
+test("make try function - run one function", async () => {
     const tryTest1 = makeTry(async () => {
         await new Promise(res => setTimeout(res, 2000));
         return 'hello';
     }, {
-        only: true,
+        latest: true,
         abort: true
     });
 
@@ -63,6 +63,19 @@ test("make try function - run one funciton", async () => {
     }
 });
 
+test("make try function - throw error latest is true and abort is undefined or false", (done) => {
+    try {
+         makeTry(async () => {
+            await new Promise(res => setTimeout(res, 2000));
+            return 'hello';
+        }, {
+            latest: true,
+        });
+    } catch (e) {
+        expect(e).toBeInstanceOf(Error);
+        done();
+    }
+});
 
 test("make try function - abort", (done) => {
     const tryTest1 = makeTry(async () => {

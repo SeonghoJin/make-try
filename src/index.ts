@@ -47,7 +47,7 @@ export interface CanAbort {
 export type TryCatchWrapOption = {
     abort?: boolean;
     reason?: string;
-    only?: boolean;
+    latest?: boolean;
 };
 
 export function makeTry<T extends AsyncFunction, K extends TryCatchWrapOption>(callback: T, options?: K): MakeTryReturn<T> & (K['abort'] extends true ? CanAbort : {});
@@ -58,7 +58,7 @@ export function makeTry<T extends Function>(callback: T, options?: TryCatchWrapO
         try {
             const result = callback(...args);
             if (isPromise(result)) {
-                if(options?.only){
+                if(options?.latest){
                     controller?.abort();
                 }
                 const promise = new Promise((res, rej) => {
@@ -103,7 +103,7 @@ export function makeTry<T extends Function>(callback: T, options?: TryCatchWrapO
         }
     }
 
-    if(options?.only && !options?.abort){
+    if(options?.latest && !options?.abort){
         throw new Error('The abort option must be true to use the only option.');
     }
 
