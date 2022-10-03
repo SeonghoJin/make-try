@@ -8,6 +8,6 @@
     "dependencies": {
         "@types/jest": "^28.1.6",
         "ts-node": "^10.9.1",
-        "ts-try-catch-wrap": "file:../"
+        "ts-try-catch-wrap": "^1.1.0"
     }
 }
