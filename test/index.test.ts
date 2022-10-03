@@ -30,6 +30,40 @@ test("make try function - async(fail)", async () => {
     }
 });
 
+test("make try function - not defined abort", done => {
+    const tryTest1 = makeTry(async () => {
+        await new Promise(res => setTimeout(res, 2000));
+        return 'hello';
+    });
+
+    try {
+        // @ts-ignore
+        tryTest1.abort();
+    } catch (e) {
+        done();
+    }
+});
+
+
+test("make try function - run one funciton", async () => {
+    const tryTest1 = makeTry(async () => {
+        await new Promise(res => setTimeout(res, 2000));
+        return 'hello';
+    }, {
+        only: true,
+        abort: true
+    });
+
+    setTimeout(tryTest1, 1000);
+    const {result, hasError, err} = await tryTest1();
+    expect(hasError).toBeTruthy();
+    if (hasError) {
+        expect(result).toEqual(null);
+        expect(err).toBeInstanceOf(Error);
+    }
+});
+
+
 test("make try function - abort", (done) => {
     const tryTest1 = makeTry(async () => {
         await new Promise(res => setTimeout(res, 1000));

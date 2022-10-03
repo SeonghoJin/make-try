@@ -29,7 +29,7 @@ export type MakeSyncReturn<T extends Function> =
     (...args: Parameters<T>) => MakeReturnPayload<ReturnType<T>>
 
 export type MakeAsyncReturn<T extends AsyncFunction> =
-    (...args: Parameters<T>) => Promise<MakeReturnPayload<ReturnType<T>>> & CanAbort
+    (...args: Parameters<T>) => Promise<MakeReturnPayload<ReturnType<T>>>
 
 export type MakeTryReturn<T extends Function> =
     IsAsyncFunction<T> extends true
@@ -46,10 +46,11 @@ export interface CanAbort {
 
 export type TryCatchWrapOption = {
     abort?: boolean;
-    reason?: string
+    reason?: string;
+    only?: boolean;
 };
 
-export function makeTry<T extends AsyncFunction>(callback: T, options?: TryCatchWrapOption): MakeTryReturn<T> & CanAbort;
+export function makeTry<T extends AsyncFunction, K extends TryCatchWrapOption>(callback: T, options?: K): MakeTryReturn<T> & (K['abort'] extends true ? CanAbort : {});
 export function makeTry<T extends Function>(callback: T): MakeTryReturn<T>;
 export function makeTry<T extends Function>(callback: T, options?: TryCatchWrapOption): unknown {
     let controller: AbortController | null = null;
@@ -57,7 +58,9 @@ export function makeTry<T extends Function>(callback: T, options?: TryCatchWrapO
         try {
             const result = callback(...args);
             if (isPromise(result)) {
-                controller?.abort();
+                if(options?.only){
+                    controller?.abort();
+                }
                 const promise = new Promise((res, rej) => {
                     if(options?.abort){
                         controller = new AbortController();
@@ -99,8 +102,18 @@ export function makeTry<T extends Function>(callback: T, options?: TryCatchWrapO
             }
         }
     }
-    if(options?.abort){
-        wrapFunc.abort = () => controller?.abort();
+
+    if(options?.only && !options?.abort){
+        throw new Error('The abort option must be true to use the only option.');
     }
+
+    wrapFunc.abort = () => {
+        if(options?.abort){
+            controller?.abort();
+            return;
+        }
+        throw new Error('not defined abort, if you want use abort, abort is true in options');
+    } ;
+
     return wrapFunc;
 }
