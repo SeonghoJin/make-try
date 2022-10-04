@@ -45,7 +45,7 @@ test("make try function - not defined abort", done => {
 });
 
 
-test("make try function - run one function", async () => {
+test("make try function - lastest", async () => {
     const tryTest1 = makeTry(async () => {
         await new Promise(res => setTimeout(res, 2000));
         return 'hello';
