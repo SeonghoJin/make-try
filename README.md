@@ -1,6 +1,6 @@
 # Usage
 ```
-npm i ts-try-catch-wrap
+npm i make-try
 ```
 
 # Why
